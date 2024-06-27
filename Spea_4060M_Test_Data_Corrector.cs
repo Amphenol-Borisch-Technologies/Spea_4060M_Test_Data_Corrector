@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
 using System.Linq;
-using System.CodeDom;
+
 // This program aids correcting erroneous Spea 4060M test data.
 // - Tailored to Certification Data Collection (CDCol) version 6, the highest version both ABT & Test Coach can generate.
 // - CDCol 7 is the most current, but Test Coach hasn't installed the more recent versions of Spea Leonardo, so doesn't have access to CDCol 7.
@@ -18,6 +18,8 @@ namespace Spea_4060M_Test_Data_Corrector {
 
     public partial class Spea_4060M_Test_Data_Corrector : Form {
         internal FileStream fileStream = null;
+        internal String testDataDirectory = @"P:\Test\TDR";
+
         public Spea_4060M_Test_Data_Corrector() { this.InitializeComponent(); }
         private void BtnCorrectData_Click(Object sender, EventArgs e) {
             // Enabled/disabled states of btnCorrectData & btnDoNotCorrectData are used as flags to method CorrectTestFailure.
@@ -31,18 +33,19 @@ namespace Spea_4060M_Test_Data_Corrector {
 
         private void BtnOpenTestData_Click(Object sender, EventArgs e) {
             using (OpenFileDialog openFileDialog = new OpenFileDialog()) {
-                openFileDialog.InitialDirectory = @"P:\Test\TDR";
+                openFileDialog.InitialDirectory = testDataDirectory;
                 openFileDialog.Filter = "Text files (*.txt)|*.txt";
                 openFileDialog.Title = "Select a Spea 4060M Test Data file";
                 openFileDialog.Multiselect = false;
-                if (openFileDialog.ShowDialog() == DialogResult.OK) this.ProcessTestFile(openFileDialog.FileName);
+                if (openFileDialog.ShowDialog() == DialogResult.OK) {
+                    testDataDirectory = Path.GetDirectoryName(openFileDialog.FileName);
+                    this.ProcessTestFile(openFileDialog.FileName);
+                }
             }
             this.txtTestData.Text = "";
         }
 
-        private void Form_Closing(Object sender, FormClosingEventArgs e) {
-            if (this.fileStream != null) this.fileStream.Close();
-        }
+        private void Form_Closing(Object sender, FormClosingEventArgs e) { this.fileStream?.Close(); }
 
         private void ProcessTestFile(String fileName) {
             this.Text = fileName;
@@ -224,19 +227,19 @@ namespace Spea_4060M_Test_Data_Corrector {
                 case Int32 e when -18 <= e && e <= -16: return (manExp.Item2 + 18, "atto");
                 case Int32 e when -15 <= e && e <= -13: return (manExp.Item2 + 15, "femto");
                 case Int32 e when -12 <= e && e <= -10: return (manExp.Item2 + 12, "pico");
-                case Int32 e when -9 <= e && e <= -7: return (manExp.Item2 + 9, "nano");
-                case Int32 e when -6 <= e && e <= -4: return (manExp.Item2 + 6, "micro");
-                case Int32 e when -3 <= e && e <= -1: return (manExp.Item2 + 3, "milli");
-                case Int32 e when 0 <= e && e <= 2: return (manExp.Item2 + 0, "");
-                case Int32 e when 3 <= e && e <= 5: return (manExp.Item2 - 3, "kilo");
-                case Int32 e when 6 <= e && e <= 8: return (manExp.Item2 - 6, "mega");
-                case Int32 e when 9 <= e && e <= 11: return (manExp.Item2 - 9, "giga");
-                case Int32 e when 12 <= e && e <= 14: return (manExp.Item2 - 12, "tera");
-                case Int32 e when 15 <= e && e <= 17: return (manExp.Item2 - 15, "peta");
-                case Int32 e when 18 <= e && e <= 20: return (manExp.Item2 - 18, "exa");
-                case Int32 e when 21 <= e && e <= 23: return (manExp.Item2 - 21, "zetta");
-                case Int32 e when 24 <= e && e <= 26: return (manExp.Item2 - 24, "yotta");
-                default: return (0, "");
+                case Int32 e when -9 <= e && e <= -7:   return (manExp.Item2 + 9, "nano");
+                case Int32 e when -6 <= e && e <= -4:   return (manExp.Item2 + 6, "micro");
+                case Int32 e when -3 <= e && e <= -1:   return (manExp.Item2 + 3, "milli");
+                case Int32 e when 0 <= e && e <= 2:     return (manExp.Item2 + 0, "");
+                case Int32 e when 3 <= e && e <= 5:     return (manExp.Item2 - 3, "kilo");
+                case Int32 e when 6 <= e && e <= 8:     return (manExp.Item2 - 6, "mega");
+                case Int32 e when 9 <= e && e <= 11:    return (manExp.Item2 - 9, "giga");
+                case Int32 e when 12 <= e && e <= 14:   return (manExp.Item2 - 12, "tera");
+                case Int32 e when 15 <= e && e <= 17:   return (manExp.Item2 - 15, "peta");
+                case Int32 e when 18 <= e && e <= 20:   return (manExp.Item2 - 18, "exa");
+                case Int32 e when 21 <= e && e <= 23:   return (manExp.Item2 - 21, "zetta");
+                case Int32 e when 24 <= e && e <= 26:   return (manExp.Item2 - 24, "yotta");
+                default:                                return (0, "");
             }
         }
 
@@ -247,24 +250,24 @@ namespace Spea_4060M_Test_Data_Corrector {
 
         private Int32 MetricPrefixToExponent(String prefix) {
             switch (prefix) {
-                case "yocto": return -24;
-                case "zepto": return -21;
-                case "atto": return -18;
-                case "femto": return -15;
-                case "pico": return -12;
-                case "nano": return -9;
-                case "micro": return -6;
-                case "milli": return -3;
-                case "": return 0;
-                case "kilo": return 3;
-                case "mega": return 6;
-                case "giga": return 9;
-                case "tera": return 12;
-                case "peta": return 15;
-                case "exa": return 18;
-                case "zetta": return 21;
-                case "yotta": return 24;
-                default: return 0;
+                case "yocto":   return -24;
+                case "zepto":   return -21;
+                case "atto":    return -18;
+                case "femto":   return -15;
+                case "pico":    return -12;
+                case "nano":    return -9;
+                case "micro":   return -6;
+                case "milli":   return -3;
+                case "":        return 0;
+                case "kilo":    return 3;
+                case "mega":    return 6;
+                case "giga":    return 9;
+                case "tera":    return 12;
+                case "peta":    return 15;
+                case "exa":     return 18;
+                case "zetta":   return 21;
+                case "yotta":   return 24;
+                default:        return 0;
             }
         }
 
