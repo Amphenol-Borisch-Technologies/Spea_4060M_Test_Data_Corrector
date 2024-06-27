@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
@@ -18,7 +19,7 @@ namespace Spea_4060M_Test_Data_Corrector {
 
     public partial class Spea_4060M_Test_Data_Corrector : Form {
         internal FileStream fileStream = null;
-        internal String testDataDirectory = @"P:\Test\TDR";
+        internal String testDataDirectory = ConfigurationManager.AppSettings["RootDirectoryTDR"].Trim();
 
         public Spea_4060M_Test_Data_Corrector() { this.InitializeComponent(); }
         private void BtnCorrectData_Click(Object sender, EventArgs e) {
