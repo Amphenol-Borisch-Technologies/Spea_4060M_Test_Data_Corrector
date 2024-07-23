@@ -75,13 +75,14 @@ namespace Spea_4060M_Test_Data_Corrector {
                 File.WriteAllLines(tempFileName, testData);
                 File.Delete(fileName);
                 File.Move(tempFileName, fileName);
-                failures = (from test in testData where test.Contains("FAIL") select test).Count();
+                const String FAIL_STRING = ";FAIL";
+                failures = (from test in testData where test.Contains(FAIL_STRING) select test).Count();
                 if (failures != 0) {
-                    MessageBox.Show(String.Format("Search String 'FAIL' still found in this test data file.{0}{0}" +
-                                                  "Cannot rename file with '_P.txt' suffix.", Environment.NewLine), "'FAIL' still found.", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(String.Format($"Search String '{FAIL_STRING}' still found in this test data file.{0}{0}" +
+                                                  "Cannot rename file with '_P.txt' suffix.", Environment.NewLine), $"'{FAIL_STRING}' still found.", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 } else {
-                    MessageBox.Show(String.Format("Search String 'FAIL' no longer found in this test data file.{0}{0}" +
-                                                  "Renaming file with '_P.txt' suffix for Pass instead of '_F.txt'.", Environment.NewLine), "'FAIL' no longer found.", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(String.Format($"Search String '{FAIL_STRING}' no longer found in this test data file.{0}{0}" +
+                                                  "Renaming file with '_P.txt' suffix for Pass instead of '_F.txt'.", Environment.NewLine), $"'{FAIL_STRING}' no longer found.", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     File.Move(fileName, fileName.Replace("_F.txt", "_P.txt"));
                 }
             this.Text = "Spea 4060M Test Data Corrector";
