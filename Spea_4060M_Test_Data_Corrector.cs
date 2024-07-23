@@ -20,6 +20,8 @@ namespace Spea_4060M_Test_Data_Corrector {
     public partial class Spea_4060M_Test_Data_Corrector : Form {
         internal FileStream fileStream = null;
         internal String testDataDirectory = ConfigurationManager.AppSettings["RootDirectoryTDR"].Trim();
+        private const String FAIL_STRING = ";FAIL";
+        private const String FAIL = "FAIL";
 
         public Spea_4060M_Test_Data_Corrector() { this.InitializeComponent(); }
         private void BtnCorrectData_Click(Object sender, EventArgs e) {
@@ -51,9 +53,9 @@ namespace Spea_4060M_Test_Data_Corrector {
         private void ProcessTestFile(String fileName) {
             this.Text = fileName;
             String[] testData = File.ReadAllLines(fileName);
-            Int32 failures = (from test in testData where test.Contains("FAIL") select test).Count();
+            Int32 failures = (from test in testData where test.Contains(FAIL_STRING) select test).Count();
             if (failures == 0) {
-                MessageBox.Show("Search String 'FAIL' not found in this test data file.", "'FAIL' not found.", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"Search String '{FAIL_STRING}' not found in this test data file.", $"'{FAIL_STRING}' not found.", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             List<String> boardResults = (from test in testData where test.StartsWith("BOARDRESULT") select test).ToList();
@@ -75,7 +77,6 @@ namespace Spea_4060M_Test_Data_Corrector {
                 File.WriteAllLines(tempFileName, testData);
                 File.Delete(fileName);
                 File.Move(tempFileName, fileName);
-                const String FAIL_STRING = ";FAIL";
                 failures = (from test in testData where test.Contains(FAIL_STRING) select test).Count();
                 if (failures != 0) {
                     MessageBox.Show(String.Format($"Search String '{FAIL_STRING}' still found in this test data file.{0}{0}" +
@@ -98,7 +99,7 @@ namespace Spea_4060M_Test_Data_Corrector {
             switch (testSplit[0].ToUpper()) {
                 case "ANL": case "ESCAN": case "FUNC": case "JSCAN": case "OPT":
                     // Field 7=Result, 8=Measure, 9=Thr Min, 10=Thr Max & 11=Measure Type.
-                    if (testSplit[7].Contains("FAIL") && this.CorrectTestFailure(testLine: testLine, testSplit: testSplit, startField: 7, fieldCount: 2)) {
+                    if (testSplit[7].Contains(FAIL) && this.CorrectTestFailure(testLine: testLine, testSplit: testSplit, startField: 7, fieldCount: 2)) {
                         Double thrMin = Double.Parse(testSplit[9]), thrMax = Double.Parse(testSplit[10]);
                         String measureType = testSplit[11], testUnits;
                         TestLimit lowLimit, highLimit;
@@ -164,21 +165,21 @@ namespace Spea_4060M_Test_Data_Corrector {
                 case "BOARDRESULT":
                     // Field 2,3,4...n=Result(s).
                     for (Int32 i = 1; i < testSplit.Length; i++) {
-                        if (testSplit[i].Contains("FAIL") && this.CorrectTestFailure(testLine: testLine, testSplit: testSplit, startField: i, fieldCount: 1)) testSplit[i] = "PASS";
+                        if (testSplit[i].Contains(FAIL) && this.CorrectTestFailure(testLine: testLine, testSplit: testSplit, startField: i, fieldCount: 1)) testSplit[i] = "PASS";
                         testLine = String.Join(";", testSplit);
                     }
                     break;
                 case "DIG":
                     // Field 6=Result.  No Measure, Thr Min, Thr Max or Measure Type fields.
-                    if (testSplit[5].Contains("FAIL") && this.CorrectTestFailure(testLine: testLine, testSplit: testSplit, startField: 5, fieldCount: 1)) testSplit[5] = "PASS";
+                    if (testSplit[5].Contains(FAIL) && this.CorrectTestFailure(testLine: testLine, testSplit: testSplit, startField: 5, fieldCount: 1)) testSplit[5] = "PASS";
                     break;
                 case "END":
                     // Field 2=Result.
-                    if (testSplit[1].Contains("FAIL") && this.CorrectTestFailure(testLine: testLine, testSplit: testSplit, startField: 1, fieldCount: 1)) testSplit[1] = "PASS";
+                    if (testSplit[1].Contains(FAIL) && this.CorrectTestFailure(testLine: testLine, testSplit: testSplit, startField: 1, fieldCount: 1)) testSplit[1] = "PASS";
                     break;
                 case "OBP":
                     // Field 8=Result.  OBP's documentation references but doesn't use Measure, Thr Min, Thr Max or Measure Type fields.
-                    if (testSplit[7].Contains("FAIL") && this.CorrectTestFailure(testLine: testLine, testSplit: testSplit, startField: 7, fieldCount: 1)) testSplit[7] = "PASS";
+                    if (testSplit[7].Contains(FAIL) && this.CorrectTestFailure(testLine: testLine, testSplit: testSplit, startField: 7, fieldCount: 1)) testSplit[7] = "PASS";
                     break;
                 case "ANLAUTO": case "ASCC": case "BSC": case "CSCAN":
                     // Couldn't find sufficient documentation for "ANLAUTO", "ASCC", "BSC" or "CSCAN" to correct correctly.
